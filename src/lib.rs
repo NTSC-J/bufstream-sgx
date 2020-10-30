@@ -57,6 +57,13 @@
 //! flushed/written when they are dropped, and this is not always a suitable
 //! time to perform I/O. If I/O streams are flushed before drop, however, then
 //! these operations will be a noop.
+#![cfg_attr(any(not(feature = "std"),
+                all(feature = "mesalock_sgx",
+                    not(target_env = "sgx"))), no_std)]
+#![cfg_attr(all(target_env = "sgx", target_vendor = "mesalock"), feature(rustc_private))]
+
+#[cfg(all(feature = "mesalock_sgx", not(target_env = "sgx")))]
+extern crate sgx_tstd as std;
 
 #[cfg(feature = "tokio")] extern crate futures;
 #[cfg(feature = "tokio")] #[macro_use] extern crate tokio_io;
@@ -65,6 +72,7 @@ use std::fmt;
 use std::io::prelude::*;
 use std::io::{self, BufReader, BufWriter, Seek, SeekFrom};
 use std::error;
+use std::prelude::v1::*;
 
 #[cfg(feature = "tokio")] use futures::{Async, Poll};
 #[cfg(feature = "tokio")] use tokio_io::{AsyncRead, AsyncWrite};
